@@ -1,8 +1,12 @@
 import json
 import logging
+from queue import Queue
+from threading import Thread
 
 import telegram
 import urllib3
+from telegram import Bot
+from telegram.ext import Dispatcher
 from telegram.ext import Filters
 from telegram.ext import MessageHandler
 from telegram.ext import (Updater)
@@ -10,10 +14,6 @@ from urllib3.exceptions import InsecureRequestWarning
 
 import settings
 from utils import bool2str, formatted_utc_time, get_http_headers, get_default_description
-
-logging.basicConfig(filename='bot.log',
-                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.INFO)
 
 logger = logging.getLogger(__name__)
 
@@ -67,12 +67,20 @@ def error(bot, update, error):
     logger.warning('Update "%s" caused error "%s"' % (update, error))
 
 
-def main():
-    # Create the Updater and pass it your bot's token.
-    updater = Updater(settings.TELEGRAM_GIST_BOT_TOKEN)
+def setup(webhook_url=None):
+    """If webhook_url is not passed, run with long-polling."""
+    logging.basicConfig(filename='bot.log',
+                        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                        level=logging.INFO)
 
-    # Get the dispatcher to register handlers
-    dp = updater.dispatcher
+    if webhook_url:
+        bot = Bot(settings.TELEGRAM_GIST_BOT_TOKEN)
+        update_queue = Queue()
+        dp = Dispatcher(bot, update_queue)
+    else:
+        updater = Updater(settings.TELEGRAM_GIST_BOT_TOKEN)
+        bot = updater.bot
+        dp = updater.dispatcher
 
     # message handlers
     text_handler = MessageHandler(Filters.text, on_text_receive)
@@ -81,19 +89,18 @@ def main():
     dp.add_handler(text_handler)
     dp.add_handler(file_handler)
 
-    # log all errors
-    dp.add_error_handler(error)
-
-    # Start the Bot
-    updater.start_polling()
-
     logger.info('Bot started.')
 
-    # Run the bot until the you presses Ctrl-C or the process receives SIGINT,
-    # SIGTERM or SIGABRT. This should be used most of the time, since
-    # start_polling() is non-blocking and will stop the bot gracefully.
-    updater.idle()
+    if webhook_url:
+        bot.set_webhook(webhook_url=webhook_url)
+        thread = Thread(target=dp.start, name='dispatcher')
+        thread.start()
+        return update_queue, bot
+    else:
+        bot.set_webhook()  # Delete webhook
+        updater.start_polling()
+        updater.idle()
 
 
 if __name__ == '__main__':
-    main()
+    setup()
