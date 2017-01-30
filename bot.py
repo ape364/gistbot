@@ -69,7 +69,7 @@ def error(bot, update, error):
 
 def main():
     # Create the Updater and pass it your bot's token.
-    updater = Updater(settings.TOKEN)
+    updater = Updater(settings.TELEGRAM_GIST_BOT_TOKEN)
 
     # Get the dispatcher to register handlers
     dp = updater.dispatcher
