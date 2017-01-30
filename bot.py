@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 from queue import Queue
 from threading import Thread
 
@@ -69,7 +70,7 @@ def error(bot, update, error):
 
 def setup(webhook_url=None):
     """If webhook_url is not passed, run with long-polling."""
-    logging.basicConfig(filename='bot.log',
+    logging.basicConfig(filename=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'bot.log'),
                         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                         level=logging.INFO)
 
