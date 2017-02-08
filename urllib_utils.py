@@ -19,7 +19,7 @@ def create_gist(description, filename, content, public=True):
     }
 
     r = get_request_contents('POST', settings.GITHUB_API_URL, get_http_headers(), encoded_body)
-    return json.loads(r).get('html_url')
+    return json.loads(r.decode('utf-8')).get('html_url')
 
 
 def get_request_contents(method, url, headers=None, body=None):
