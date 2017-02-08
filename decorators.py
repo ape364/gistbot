@@ -17,7 +17,9 @@ def size_limit(f):
         min_limit, max_limit = settings.FILESIZE_LIMIT_MIN_IN_BYTES, settings.FILESIZE_LIMIT_MAX_IN_BYTES
 
         if not (min_limit < size < max_limit):
-            update.message.reply_text(f'{msg_type} must be greater than {min_limit} and less than {max_limit} bytes')
+            update.message.reply_text('{} must be greater than {} and less than {} bytes'.format(msg_type,
+                                                                                                 min_limit,
+                                                                                                 max_limit))
         else:
             f(bot, update, *args, **kwargs)
 
@@ -31,13 +33,13 @@ def stop_flood(f):
             uid = upd.message.from_user.id
             if MSG_FREQ_LIMIT_IN_SECONDS > msg_ts - uh.get_last_message_ts(uid):
                 seconds_remaining = uh.get_last_message_ts(uid) + MSG_FREQ_LIMIT_IN_SECONDS - msg_ts
-                return f'Too many requests. Please try again in {seconds_remaining} seconds'
+                return 'Too many requests. Please try again in {} seconds'.format(seconds_remaining)
 
         def txt_msg_dup_check(upd):
             uid = upd.message.from_user.id
             if string_md5(upd.message.text) == uh.get_last_text_message_hash(upd.message.from_user.id):
                 gist_url = uh.get_last_gist_from_text_url(uid)
-                return f'Your document is duplicating previous. Here it is {gist_url}'
+                return 'Your message is duplicating previous. Here it is {}'.format(gist_url)
 
         def file_msg_dup_check(upd):
             if not upd.message.document:
@@ -51,7 +53,7 @@ def stop_flood(f):
             if any([file_id == uh.get_last_file_id(uid),
                     string_md5(checked_file_contents) == uh.get_last_file_contents_hash(uid)]):
                 gist_url = uh.get_last_gist_from_file_url(uid)
-                return f'Your document is duplicating previous. Here it is {gist_url}'
+                return 'Your document is duplicating previous. Here it is {}'.format(gist_url)
 
         flooding = False
 
