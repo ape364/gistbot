@@ -1,67 +1,55 @@
-import json
 import logging
 import os
 from queue import Queue
 from threading import Thread
 
 import telegram
-import urllib3
 from telegram import Bot
 from telegram.ext import Dispatcher
 from telegram.ext import Filters
 from telegram.ext import MessageHandler
 from telegram.ext import (Updater)
-from urllib3.exceptions import InsecureRequestWarning
 
 import settings
-from utils import bool2str, formatted_utc_time, get_http_headers, get_default_description
+from decorators import stop_flood, size_limit
+from shelve_utils import users_history as uh
+from urllib_utils import create_gist, get_request_contents
+from utils import formatted_utc_time, get_default_description
 
 logger = logging.getLogger(__name__)
-
-
-def create_gist(description, filename, content, public=True):
-    encoded_body = {
-        "description": description,
-        "public": bool2str(public),
-        "files": {
-            filename: {
-                "content": content
-            }
-        }
-    }
-
-    r = get_request_contents('POST', settings.GITHUB_API_URL, get_http_headers(), encoded_body)
-    return json.loads(r).get('html_url', 'Error during uploading a gist.')
-
-
-def get_request_contents(method, url, headers=None, body=None):
-    http = urllib3.PoolManager()
-    urllib3.disable_warnings(InsecureRequestWarning)
-    return http.request(method=method, url=url, headers=headers, body=json.dumps(body)).data
 
 
 def start(bot, update):
     update.message.reply_text("Hello. I can upload your text and documents to https://gist.github.com.")
 
 
+@stop_flood
+@size_limit
 def on_text_receive(bot, update):
     bot.sendChatAction(chat_id=update.message.chat_id, action=telegram.ChatAction.TYPING)
-    update.message.reply_text(create_gist(get_default_description(),
-                                          formatted_utc_time(),
-                                          update.message.text))
+    url = create_gist(get_default_description(),
+                      formatted_utc_time(),
+                      update.message.text)
+    if url:
+        uh.update_user_history(update.message.from_user.id, text_url=url)
+        update.message.reply_text(url)
+    else:
+        update.message.reply_text('Error during uploading a gist. Please try again.')
 
 
+@stop_flood
+@size_limit
 def on_file_receive(bot, update):
-    filename = update.message.document.file_name
     new_file = bot.getFile(update.message.document.file_id)
-    if new_file.file_size > settings.FILESIZE_LIMIT_IN_BYTES:
-        update.message.reply_text('File size is too big. Limit is %d bytes' % settings.FILESIZE_LIMIT_IN_BYTES)
-        return
-
     bot.sendChatAction(chat_id=update.message.chat_id, action=telegram.ChatAction.TYPING)
-    update.message.reply_text(create_gist(get_default_description(),
-                                          filename,
-                                          get_request_contents('GET', new_file.file_path).decode('utf-8')))
+    url = create_gist(get_default_description(),
+                      update.message.document.file_name,
+                      get_request_contents('GET', new_file.file_path))
+    if url:
+        uh.update_user_history(update.message.from_user.id, file_url=url)
+        update.message.reply_text(url)
+    else:
+        update.message.reply_text('Error during uploading a gist. Please try again.')
 
 
 def error(bot, update, error):
