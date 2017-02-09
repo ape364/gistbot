@@ -13,4 +13,4 @@ SHELVE_FILENAME = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'shel
 REPO_DIR = os.environ.get('OPENSHIFT_REPO_DIR')
 DOMAIN_NAME = os.environ.get('OPENSHIFT_GEAR_DNS')
 SERVER_IP = os.environ.get('OPENSHIFT_PYTHON_IP')
-SERVER_PORT = int(os.environ.get('OPENSHIFT_PYTHON_PORT'))
+SERVER_PORT = int(os.environ.get('OPENSHIFT_PYTHON_PORT', '0'))
