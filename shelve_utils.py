@@ -5,22 +5,25 @@ import settings
 
 
 class ShelveHelper:
-    def __init__(self):
-        self._d = shelve.open(settings.SHELVE_FILENAME)
+    def __init__(self, filepath):
+        self.filepath = filepath
 
     @staticmethod
     def _get_keys():
         return {'date', 'txt_msg_hash', 'file_contents_hash', 'file_id', 'text_url', 'file_url'}
 
     def _get_value(self, user_id):
-        data = self._d.get(str(user_id))
-        return json.loads(data) if data else dict()
+        with shelve.open(self.filepath) as db:
+            data = db.get(str(user_id))
+            return json.loads(data) if data else dict()
 
     def _set_value(self, user_id, data):
-        self._d[str(user_id)] = json.dumps(data)
+        with shelve.open(self.filepath) as db:
+            db[str(user_id)] = json.dumps(data)
 
     def is_known_user(self, user_id):
-        return str(user_id) in self._d
+        with shelve.open(self.filepath) as db:
+            return str(user_id) in db
 
     def get_last_message_ts(self, user_id):
         return int(self._get_value(user_id).get('date'))
@@ -50,4 +53,4 @@ class ShelveHelper:
         self._set_value(user_id, d)
 
 
-users_history = ShelveHelper()
+users_history = ShelveHelper(settings.SHELVE_FILENAME)
