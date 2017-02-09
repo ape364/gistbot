@@ -4,13 +4,13 @@ import urllib3
 from urllib3.exceptions import InsecureRequestWarning
 
 import settings
-from utils import bool2str, get_http_headers, decode_bytes
+from utils import get_http_headers, decode_bytes
 
 
 def create_gist(description, filename, content, public=True):
     encoded_body = {
         "description": description,
-        "public": bool2str(public),
+        "public": 'true' if public else 'false',
         "files": {
             filename: {
                 "content": decode_bytes(content)

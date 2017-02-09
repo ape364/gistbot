@@ -17,11 +17,11 @@ def size_limit(f):
         min_limit, max_limit = settings.FILESIZE_LIMIT_MIN_IN_BYTES, settings.FILESIZE_LIMIT_MAX_IN_BYTES
 
         if not (min_limit < size < max_limit):
-            update.message.reply_text('{} must be greater than {} and less than {} bytes'.format(msg_type,
-                                                                                                 min_limit,
-                                                                                                 max_limit))
-        else:
             f(bot, update, *args, **kwargs)
+        else:
+            update.message.reply_text(
+                '{} must be greater than {} and less than {} bytes'.format(msg_type, min_limit, max_limit)
+            )
 
     return wrapped_f
 
@@ -65,19 +65,25 @@ def stop_flood(f):
                     flooding = True
                     break
 
-        if not flooding:
-            if update.message.document:
-                new_file = bot.getFile(update.message.document.file_id)
-                file_contents = get_request_contents('GET', new_file.file_path)
-                uh.update_user_history(update.message.from_user.id,
-                                       date=unix_ts(update.message.date),
-                                       file_id=update.message.document.file_id,
-                                       file_contents_hash=string_md5(file_contents))
-            else:
-                uh.update_user_history(update.message.from_user.id,
-                                       date=unix_ts(update.message.date),
-                                       txt_msg_hash=string_md5(update.message.text))
+        if flooding:
+            return
 
-            f(bot, update, *args, **kwargs)
+        if update.message.document:
+            new_file = bot.getFile(update.message.document.file_id)
+            file_contents = get_request_contents('GET', new_file.file_path)
+            uh.update_user_history(
+                update.message.from_user.id,
+                date=unix_ts(update.message.date),
+                file_id=update.message.document.file_id,
+                file_contents_hash=string_md5(file_contents)
+            )
+        else:
+            uh.update_user_history(
+                update.message.from_user.id,
+                date=unix_ts(update.message.date),
+                txt_msg_hash=string_md5(update.message.text)
+            )
+
+        f(bot, update, *args, **kwargs)
 
     return wrapped_f

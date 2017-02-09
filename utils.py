@@ -1,15 +1,6 @@
-import datetime
 import hashlib
 
 import chardet
-
-
-def bool2str(b):
-    return 'true' if b else 'false'
-
-
-def formatted_utc_time(dt_format='%Y%d%m%H%M%S'):
-    return datetime.datetime.utcnow().strftime(dt_format)
 
 
 def get_http_headers(content_type='application/json', user_agent='Gist-Uploader-Bot'):

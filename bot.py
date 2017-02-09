@@ -1,10 +1,10 @@
 import logging
 import os
+from datetime import datetime
 from queue import Queue
 from threading import Thread
 
 import telegram
-from telegram import Bot
 from telegram.ext import Dispatcher
 from telegram.ext import Filters
 from telegram.ext import MessageHandler
@@ -14,7 +14,7 @@ import settings
 from decorators import stop_flood, size_limit
 from shelve_utils import users_history as uh
 from urllib_utils import create_gist, get_request_contents
-from utils import formatted_utc_time, get_default_description
+from utils import get_default_description
 
 logger = logging.getLogger(__name__)
 
@@ -27,9 +27,11 @@ def start(bot, update):
 @size_limit
 def on_text_receive(bot, update):
     bot.sendChatAction(chat_id=update.message.chat_id, action=telegram.ChatAction.TYPING)
-    url = create_gist(get_default_description(),
-                      formatted_utc_time(),
-                      update.message.text)
+    url = create_gist(
+        get_default_description(),
+        datetime.utcnow().strftime('%Y%d%m%H%M%S'),
+        update.message.text
+    )
     if url:
         uh.update_user_history(update.message.from_user.id, text_url=url)
         update.message.reply_text(url)
@@ -42,9 +44,11 @@ def on_text_receive(bot, update):
 def on_file_receive(bot, update):
     new_file = bot.getFile(update.message.document.file_id)
     bot.sendChatAction(chat_id=update.message.chat_id, action=telegram.ChatAction.TYPING)
-    url = create_gist(get_default_description(),
-                      update.message.document.file_name,
-                      get_request_contents('GET', new_file.file_path))
+    url = create_gist(
+        get_default_description(),
+        update.message.document.file_name,
+        get_request_contents('GET', new_file.file_path)
+    )
     if url:
         uh.update_user_history(update.message.from_user.id, file_url=url)
         update.message.reply_text(url)
@@ -53,7 +57,7 @@ def on_file_receive(bot, update):
 
 
 def error(bot, update, error):
-    logger.warning('Update "%s" caused error "%s"' % (update, error))
+    logger.error('Update "%s" caused error "%s"' % (update, error))
 
 
 def setup(webhook_url=None):
@@ -63,7 +67,7 @@ def setup(webhook_url=None):
                         level=logging.INFO)
 
     if webhook_url:
-        bot = Bot(settings.TELEGRAM_GIST_BOT_TOKEN)
+        bot = telegram.Bot(settings.TELEGRAM_GIST_BOT_TOKEN)
         update_queue = Queue()
         dp = Dispatcher(bot, update_queue)
     else:

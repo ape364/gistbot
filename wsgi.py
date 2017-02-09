@@ -1,16 +1,13 @@
-import os
-
 from flask import Flask, request
 from telegram import Update
 
 import bot
 import settings
 
-application = Flask(__name__, instance_path=os.environ['OPENSHIFT_REPO_DIR'])
-update_queue, bot_instance = bot.setup(webhook_url='https://{}/{}'.format(
-    os.environ['OPENSHIFT_GEAR_DNS'],
-    settings.TELEGRAM_SECRET_URL
-))
+application = Flask(__name__, instance_path=settings.REPO_DIR)
+update_queue, bot_instance = bot.setup(
+    webhook_url='https://{}/{}'.format(settings.DOMAIN_NAME, settings.TELEGRAM_SECRET_URL)
+)
 
 
 @application.route('/')
@@ -27,6 +24,5 @@ def webhook():
 
 
 if __name__ == '__main__':
-    ip = os.environ['OPENSHIFT_PYTHON_IP']
-    port = int(os.environ['OPENSHIFT_PYTHON_PORT'])
+    ip, port = settings.SERVER_IP, settings.SERVER_PORT
     application.run(host=ip, port=port)
