@@ -1,7 +1,16 @@
 import json
 import shelve
+from contextlib import contextmanager
 
 import settings
+
+
+@contextmanager
+def closing(thing):
+    try:
+        yield thing
+    finally:
+        thing.close()
 
 
 class ShelveHelper:
@@ -13,16 +22,16 @@ class ShelveHelper:
         return {'date', 'txt_msg_hash', 'file_contents_hash', 'file_id', 'text_url', 'file_url'}
 
     def _get_value(self, user_id):
-        with shelve.open(self.filepath) as db:
+        with closing(shelve.open(self.filepath)) as db:
             data = db.get(str(user_id))
             return json.loads(data) if data else dict()
 
     def _set_value(self, user_id, data):
-        with shelve.open(self.filepath) as db:
+        with closing(shelve.open(self.filepath)) as db:
             db[str(user_id)] = json.dumps(data)
 
     def is_known_user(self, user_id):
-        with shelve.open(self.filepath) as db:
+        with closing(shelve.open(self.filepath)) as db:
             return str(user_id) in db
 
     def get_last_message_ts(self, user_id):
