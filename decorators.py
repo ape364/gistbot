@@ -16,7 +16,7 @@ def size_limit(f):
 
         min_limit, max_limit = settings.FILESIZE_LIMIT_MIN_IN_BYTES, settings.FILESIZE_LIMIT_MAX_IN_BYTES
 
-        if not (min_limit < size < max_limit):
+        if min_limit < size < max_limit:
             f(bot, update, *args, **kwargs)
         else:
             update.message.reply_text(
