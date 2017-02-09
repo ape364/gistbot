@@ -14,7 +14,7 @@ import settings
 from decorators import stop_flood, size_limit
 from shelve_utils import users_history as uh
 from urllib_utils import create_gist, get_request_contents
-from utils import get_default_description
+from utils import get_default_description, unix_ts, string_md5
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +33,12 @@ def on_text_receive(bot, update):
         update.message.text
     )
     if url:
-        uh.update_user_history(update.message.from_user.id, text_url=url)
+        uh.update_user_history(
+            update.message.from_user.id,
+            date=unix_ts(update.message.date),
+            txt_msg_hash=string_md5(update.message.text),
+            text_url=url
+        )
         update.message.reply_text(url)
     else:
         update.message.reply_text('Error during uploading a gist. Please try again.')
@@ -50,7 +55,15 @@ def on_file_receive(bot, update):
         get_request_contents('GET', new_file.file_path)
     )
     if url:
-        uh.update_user_history(update.message.from_user.id, file_url=url)
+        new_file = bot.getFile(update.message.document.file_id)
+        file_contents = get_request_contents('GET', new_file.file_path)
+        uh.update_user_history(
+            update.message.from_user.id,
+            date=unix_ts(update.message.date),
+            file_id=update.message.document.file_id,
+            file_contents_hash=string_md5(file_contents),
+            file_url=url
+        )
         update.message.reply_text(url)
     else:
         update.message.reply_text('Error during uploading a gist. Please try again.')

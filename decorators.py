@@ -68,22 +68,6 @@ def stop_flood(f):
         if flooding:
             return
 
-        if update.message.document:
-            new_file = bot.getFile(update.message.document.file_id)
-            file_contents = get_request_contents('GET', new_file.file_path)
-            uh.update_user_history(
-                update.message.from_user.id,
-                date=unix_ts(update.message.date),
-                file_id=update.message.document.file_id,
-                file_contents_hash=string_md5(file_contents)
-            )
-        else:
-            uh.update_user_history(
-                update.message.from_user.id,
-                date=unix_ts(update.message.date),
-                txt_msg_hash=string_md5(update.message.text)
-            )
-
         f(bot, update, *args, **kwargs)
 
     return wrapped_f
