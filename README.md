@@ -4,4 +4,4 @@ Uploads text messages and documents to [GitHub Gist](https://gist.github.com/) v
 
 # Quickstart
 
-Just send plain text or document to [Telegram bot](http://t.me/github_gist_bot/). File limit is 16 Kbytes.
+Just send plain text or document to [Telegram bot](http://t.me/github_gist_bot/). File or message must be greater than 16 bytes and less than 16 Kbytes.
