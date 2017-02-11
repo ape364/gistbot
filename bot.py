@@ -11,7 +11,7 @@ from telegram.ext import MessageHandler
 from telegram.ext import (Updater)
 
 import settings
-from decorators import stop_flood, size_limit
+from decorators import stop_flood, size_limit, log_message
 from shelve_utils import users_history as uh
 from urllib_utils import create_gist, get_request_contents
 from utils import get_default_description, unix_ts, string_md5
@@ -23,6 +23,7 @@ def start(bot, update):
     update.message.reply_text("Hello. I can upload your text and documents to https://gist.github.com.")
 
 
+@log_message
 @stop_flood
 @size_limit
 def on_text_receive(bot, update):
@@ -44,6 +45,7 @@ def on_text_receive(bot, update):
         update.message.reply_text('Error during uploading a gist. Please try again.')
 
 
+@log_message
 @stop_flood
 @size_limit
 def on_file_receive(bot, update):
