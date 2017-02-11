@@ -1,3 +1,7 @@
+from functools import wraps
+
+from blitzdb import Document, FileBackend
+
 import settings
 from settings import MSG_FREQ_LIMIT_IN_SECONDS
 from shelve_utils import users_history as uh
@@ -6,6 +10,7 @@ from utils import string_md5, unix_ts
 
 
 def size_limit(f):
+    @wraps(f)
     def wrapped_f(bot, update, *args, **kwargs):
         if update.message.document:
             size = bot.getFile(update.message.document.file_id).file_size
@@ -27,6 +32,7 @@ def size_limit(f):
 
 
 def stop_flood(f):
+    @wraps(f)
     def wrapped_f(bot, update, *args, **kwargs):
         def msg_freq_check(upd):
             msg_ts = unix_ts(upd.message.date)
@@ -69,5 +75,31 @@ def stop_flood(f):
             return
 
         f(bot, update, *args, **kwargs)
+
+    return wrapped_f
+
+
+class Message(Document):
+    pass
+
+
+def log_message(f):
+    @wraps(f)
+    def wrapped_f(bot, update, *args, **kwargs):
+        def msg2dict(msg):
+            return dict(date=msg.date,
+                        document=msg.document,
+                        text=msg.text,
+                        message_id=msg.message_id,
+                        user=dict(id=msg.from_user.id,
+                                  name=msg.from_user.name,
+                                  first_name=msg.from_user.first_name,
+                                  last_name=msg.from_user.last_name))
+
+        msg_entry = Message(msg2dict(update.message))
+        backend = FileBackend(settings.ACCESS_LOG_DB_PATH)
+        backend.save(msg_entry)
+        backend.commit()
+        return f(bot, update, *args, **kwargs)
 
     return wrapped_f
