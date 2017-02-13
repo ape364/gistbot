@@ -5,6 +5,7 @@ from queue import Queue
 from threading import Thread
 
 import telegram
+from telegram.ext import CommandHandler
 from telegram.ext import Dispatcher
 from telegram.ext import Filters
 from telegram.ext import MessageHandler
@@ -91,9 +92,11 @@ def setup(webhook_url=None):
         dp = updater.dispatcher
 
     # message handlers
+    start_msg_handler = CommandHandler('start', start)
     text_handler = MessageHandler(Filters.text, on_text_receive)
     file_handler = MessageHandler(Filters.document, on_file_receive)
 
+    dp.add_handler(start_msg_handler)
     dp.add_handler(text_handler)
     dp.add_handler(file_handler)
 
