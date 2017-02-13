@@ -9,8 +9,9 @@ FILESIZE_LIMIT_MAX_IN_BYTES = 1024 * 16
 
 GITHUB_API_URL = 'https://api.github.com/gists'
 
-SHELVE_FILENAME = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'shelve.db')
-ACCESS_LOG_DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'blitz-db/')
+DATA_FILEPATH = os.environ.get('OPENSHIFT_DATA_DIR')
+SHELVE_FILENAME = os.path.join(DATA_FILEPATH, 'shelve.db')
+ACCESS_LOG_DB_PATH = os.path.join(DATA_FILEPATH, 'blitz-db/')
 
 REPO_DIR = os.environ.get('OPENSHIFT_REPO_DIR')
 DOMAIN_NAME = os.environ.get('OPENSHIFT_GEAR_DNS')
