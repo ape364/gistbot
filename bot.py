@@ -20,6 +20,7 @@ from utils import get_default_description, unix_ts, string_md5
 logger = logging.getLogger(__name__)
 
 
+@log_message
 def start(bot, update):
     update.message.reply_text("Hello. I can upload your text and documents to https://gist.github.com.")
 
