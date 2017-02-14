@@ -88,7 +88,7 @@ def log_message(f):
     def wrapped_f(bot, update, *args, **kwargs):
         def msg2dict(msg):
             return dict(date=msg.date,
-                        document=msg.document,
+                        document=msg.document.__dict__ if msg.document else None,
                         text=msg.text,
                         message_id=msg.message_id,
                         user=dict(id=msg.from_user.id,
