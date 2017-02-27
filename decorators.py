@@ -4,7 +4,7 @@ from functools import wraps
 from blitzdb import Document, FileBackend
 
 import settings
-from settings import MSG_FREQ_LIMIT_IN_SECONDS
+from settings import MESSAGE_INTERVAL
 from shelve_utils import users_history as uh
 from urllib_utils import get_request_contents
 from utils import string_md5, unix_ts
@@ -20,7 +20,7 @@ def size_limit(f):
             size = len(update.message.text)
             msg_type = 'Message length'
 
-        min_limit, max_limit = settings.FILESIZE_LIMIT_MIN_IN_BYTES, settings.FILESIZE_LIMIT_MAX_IN_BYTES
+        min_limit, max_limit = settings.FILESIZE_LIMIT_MIN, settings.FILESIZE_LIMIT_MAX
 
         if min_limit < size < max_limit:
             f(bot, update, *args, **kwargs)
@@ -38,8 +38,8 @@ def stop_flood(f):
         def msg_freq_check(upd):
             msg_ts = unix_ts(upd.message.date)
             uid = upd.message.from_user.id
-            if MSG_FREQ_LIMIT_IN_SECONDS > msg_ts - uh.get_last_message_ts(uid):
-                seconds_remaining = uh.get_last_message_ts(uid) + MSG_FREQ_LIMIT_IN_SECONDS - msg_ts
+            if MESSAGE_INTERVAL > msg_ts - uh.get_last_message_ts(uid):
+                seconds_remaining = uh.get_last_message_ts(uid) + MESSAGE_INTERVAL - msg_ts
                 return 'Too many requests. Please try again in {} seconds'.format(seconds_remaining)
 
         def txt_msg_dup_check(upd):
