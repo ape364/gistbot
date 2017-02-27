@@ -1,3 +1,4 @@
+import json
 from functools import wraps
 
 from blitzdb import Document, FileBackend
@@ -86,20 +87,12 @@ class Message(Document):
 def log_message(f):
     @wraps(f)
     def wrapped_f(bot, update, *args, **kwargs):
-        def msg2dict(msg):
-            return dict(date=msg.date,
-                        document=msg.document.__dict__ if msg.document else None,
-                        text=msg.text,
-                        message_id=msg.message_id,
-                        user=dict(id=msg.from_user.id,
-                                  name=msg.from_user.name,
-                                  first_name=msg.from_user.first_name,
-                                  last_name=msg.from_user.last_name))
+        msg_entry = Message(json.loads(update.to_json()))
 
-        msg_entry = Message(msg2dict(update.message))
         backend = FileBackend(settings.ACCESS_LOG_DB_PATH)
         backend.save(msg_entry)
         backend.commit()
+
         return f(bot, update, *args, **kwargs)
 
     return wrapped_f
