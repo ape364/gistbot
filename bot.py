@@ -77,8 +77,7 @@ def error(bot, update, error):
 
 def setup(webhook_url=None):
     """If webhook_url is not passed, run with long-polling."""
-    logging.basicConfig(filename=settings.LOG_FILENAME,
-                        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                         level=logging.INFO)
 
     if webhook_url:
