@@ -21,4 +21,9 @@ def string_md5(s):
 
 
 def decode_bytes(data):
-    return data if isinstance(data, str) else data.decode(chardet.detect(data).get('encoding'))
+    if isinstance(data, str):
+        return data
+    encoding = chardet.detect(data).get('encoding')
+    if not encoding:
+        return
+    return data.decode(encoding)

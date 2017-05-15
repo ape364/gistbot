@@ -8,12 +8,15 @@ from utils import get_http_headers, decode_bytes
 
 
 def create_gist(description, filename, content, public=True):
+    decoded_content = decode_bytes(content)
+    if not decoded_content:
+        return
     encoded_body = {
         "description": description,
         "public": 'true' if public else 'false',
         "files": {
             filename: {
-                "content": decode_bytes(content)
+                "content": decoded_content
             }
         }
     }
