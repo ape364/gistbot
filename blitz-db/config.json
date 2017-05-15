@@ -1,1 +1,0 @@
-{"indexes": {"message": {"pk": {"key": "pk", "id": "baeb5ee4cef642a3b6f4db27e399d8b2"}}}, "store_class": "transactional", "index_class": "transactional", "index_store_class": "basic", "serializer_class": "json", "autocommit": false, "version": "0.2.12"}

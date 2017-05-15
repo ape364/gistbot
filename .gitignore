@@ -90,3 +90,5 @@ ENV/
 # Rope project settings
 .ropeproject
 /shelve.db
+blitz-db/
+.idea/
