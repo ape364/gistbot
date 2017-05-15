@@ -4,13 +4,14 @@ import urllib3
 from urllib3.exceptions import InsecureRequestWarning
 
 import settings
+from exceptions import EncodingException
 from utils import get_http_headers, decode_bytes
 
 
 def create_gist(description, filename, content, public=True):
     decoded_content = decode_bytes(content)
     if not decoded_content:
-        return
+        raise EncodingException('Cannot detect file encoding. Is this a binary file?')
     encoded_body = {
         "description": description,
         "public": 'true' if public else 'false',

@@ -12,6 +12,7 @@ from telegram.ext import (Updater)
 
 import settings
 from decorators import stop_flood, size_limit, log_message
+from exceptions import EncodingException
 from shelve_utils import users_history as uh
 from urllib_utils import create_gist, get_request_contents
 from utils import get_default_description, unix_ts, string_md5
@@ -51,11 +52,15 @@ def on_text_receive(bot, update):
 def on_file_receive(bot, update):
     new_file = bot.getFile(update.message.document.file_id)
     bot.sendChatAction(chat_id=update.message.chat_id, action=telegram.ChatAction.TYPING)
-    url = create_gist(
-        get_default_description(),
-        update.message.document.file_name,
-        get_request_contents('GET', new_file.file_path)
-    )
+    try:
+        url = create_gist(
+            get_default_description(),
+            update.message.document.file_name,
+            get_request_contents('GET', new_file.file_path)
+        )
+    except EncodingException as e:
+        update.message.reply_text(str(e))
+        return 
     if url:
         new_file = bot.getFile(update.message.document.file_id)
         file_contents = get_request_contents('GET', new_file.file_path)
