@@ -48,7 +48,6 @@ def on_text_receive(bot, update):
 
 @log_message
 @stop_flood
-@size_limit
 def on_file_receive(bot, update):
     new_file = bot.getFile(update.message.document.file_id)
     bot.sendChatAction(chat_id=update.message.chat_id, action=telegram.ChatAction.TYPING)

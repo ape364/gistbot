@@ -13,20 +13,15 @@ from utils import string_md5, unix_ts
 def size_limit(f):
     @wraps(f)
     def wrapped_f(bot, update, *args, **kwargs):
-        if update.message.document:
-            size = bot.getFile(update.message.document.file_id).file_size
-            msg_type = 'File size'
-        else:
-            size = len(update.message.text)
-            msg_type = 'Message length'
-
-        min_limit, max_limit = settings.FILESIZE_LIMIT_MIN, settings.FILESIZE_LIMIT_MAX
-
-        if min_limit < size < max_limit:
+        if settings.MESSAGE_LEN_LIMIT_MIN < len(update.message.text) < settings.MESSAGE_LEN_LIMIT_MAX:
             f(bot, update, *args, **kwargs)
         else:
             update.message.reply_text(
-                '{} must be greater than {} and less than {} bytes'.format(msg_type, min_limit, max_limit)
+                'Message length must be greater than {} and less than {} symbols. '
+                'If this is not enough you can send a file.'.format(
+                    settings.MESSAGE_LEN_LIMIT_MIN,
+                    settings.MESSAGE_LEN_LIMIT_MAX
+                )
             )
 
     return wrapped_f

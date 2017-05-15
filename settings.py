@@ -4,8 +4,8 @@ TELEGRAM_SECRET_URL = os.environ['TELEGRAM_SECRET_URL']
 TELEGRAM_GIST_BOT_TOKEN = os.environ['TELEGRAM_GIST_BOT_TOKEN']
 
 MESSAGE_INTERVAL = 5  # seconds
-FILESIZE_LIMIT_MIN = 16  # bytes
-FILESIZE_LIMIT_MAX = 1024 * 16  # bytes
+MESSAGE_LEN_LIMIT_MIN = 16  # bytes
+MESSAGE_LEN_LIMIT_MAX = 1024 * 4  # bytes
 
 GITHUB_API_URL = 'https://api.github.com/gists'
 
