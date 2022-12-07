@@ -1,5 +1,5 @@
 blitzdb==0.4.4
-certifi==2017.1.23
+certifi==2022.12.7
 chardet==2.3.0
 click==6.7
 Flask==0.12
